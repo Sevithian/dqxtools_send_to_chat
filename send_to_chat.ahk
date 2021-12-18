@@ -14,20 +14,24 @@ Gui, Font, s16, Segoe UI
 Gui, Add, Text,, What is this?
 Gui, Font, s12, Segoe UI
 Gui, Add, Text,, A small program to get around no copy/paste support in DQX.
-Gui, Add, Text,y+1, Helpful for quests where you need to type Japanese to proceed, but you don't know how.
+Gui, Add, Text,y+1, Helpful for quests where you need to type Japanese to proceed,`n  but you don't know how. :(
 Gui, Font, s16, Segoe UI
 Gui, Add, Text,, How to use:
 Gui, Font, s12, Segoe UI
-Gui, Add, Link,, - Open DQX with something like <a href="https://xupefei.github.io/Locale-Emulator/">Locale Emulator</a> to allow typing in Japanese`n    (you don't need the Japanese IME keyboard active for this)
+Gui, Add, Link,, - Open DQX with something like <a href="https://xupefei.github.io/Locale-Emulator/">Locale Emulator</a> to allow typing in`n    Japanese (you don't need the Japanese IME keyboard active for this)
 Gui, Add, Text,y+1, - Open a fresh chat box in game and switch to the desired chat category
-Gui, Add, Text,y+1, - Bring this program into focus and paste the Japanese text you want to send to DQX
-Gui, Add, Text,y+1, - Click 'Send to DQX'. The program will move your DQX chat cursor to the appropriate`n    position and send the text into the DQX chat window
+Gui, Add, Text,y+1, - Bring this program into focus and paste the Japanese text you want to `n    send to DQX
+Gui, Add, Text,y+1, - Click 'Send to DQX'. The program will move your DQX chat cursor to`n    the appropriate position and send the text into the DQX chat window
 Gui, Add, Edit, r1 vTextToSend w500, %textToSend%
 Gui, Add, Button, gSend, Send to DQX
+Gui, Add, Button, gCloseApp x+295, Exit Program
 
 Gui, +alwaysontop
 Gui, Show, Autosize
 Return
+
+CloseApp:
+  ExitApp
 
 Send:
   GuiControlGet, TextToSend
@@ -47,8 +51,8 @@ Send:
 
     dqx := new _ClassMemory("ahk_exe DQXGame.exe", "", hProcessCopy)
     baseAddress := dqx.getProcessBaseAddress("ahk_exe DQXGame.exe")
-    chatAddress := 0x01FF377C
-    chatOffsets := [0x4C, 0x44, 0x8, 0x1E0, 0x2DC, 0x0]
+    chatAddress := 0x01EEDC8C
+    chatOffsets := [0x364, 0x1E0, 0x2DC, 0x0]
     dqx.writeBytes(baseAddress + chatAddress, convertStrToHex(textToSend), chatOffsets*)
   }
   else
