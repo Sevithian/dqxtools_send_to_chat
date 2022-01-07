@@ -51,8 +51,8 @@ Send:
 
     dqx := new _ClassMemory("ahk_exe DQXGame.exe", "", hProcessCopy)
     baseAddress := dqx.getProcessBaseAddress("ahk_exe DQXGame.exe")
-    chatAddress := 0x01EEDC8C
-    chatOffsets := [0x364, 0x1E0, 0x2DC, 0x0]
+    chatAddress := 0x01EEAA40
+    chatOffsets := [0x8, 0x8C, 0x8, 0x90, 0x2DC, 0x0]
     dqx.writeBytes(baseAddress + chatAddress, convertStrToHex(textToSend), chatOffsets*)
   }
   else
