@@ -9,7 +9,41 @@ SetWorkingDir, %A_ScriptDir%
 SetBatchLines, -1
 FileEncoding UTF-8
 
+questDict := { "Quest 001": "みーつけた！"
+             , "Quest 002": "ごめんねなの！"
+             , "Quest 003": "せんせいおしえて！"
+             , "Quest 004": "ごはんだよ！"
+             , "Quest 005": "おめでとーん！"
+             , "Quest 175": "私はマイスターです。何かお困りですか？"
+             , "Quest 331": "ベジーク・ベジセルク！"
+             , "Quest 392": "ラナルータ"
+             , "Quest 392": "夜の呼び方"
+             , "Quest 421": "われ　かのちをめざす"
+             , "Quest 450": "ナドラガンドにヒカリあれ"
+             , "Quest 453": "マイユさーん！"
+             , "Quest 480": "モモンタル"
+             , "Quest 496": "るるるんぽう"
+             , "Quest 505a": "おおきくなあれ！タネタネきゅん！"
+             , "Quest 505b": "てんまでとどけ！タネきゅんきゅん"
+             , "Quest 516": "サインください"
+             , "Quest 531": "ようせいさん　ようせいさん"
+             , "Quest 580": "ギリウスへいか　ばんざい"
+             , "Quest 606": "ベントラー"
+             , "Quest 608": "デスマスターはしなない"
+             , "Quest 616": "げいじゅつはマデッサンスなり"
+             , "Quest 627": "ガッタバ・ヨナクーン"
+             , "Quest 660": "まじんのもんよひらけ"
+             , "Quest 672": "ことばトハ　いしナリ" }
+
+seasonalDict := { "Halloween Quest": "トリックオアトリート"
+                , "Christmas Quest": "メリークリスマス" }
+
+; These will change on patches
+chatAddress := 0x01EEAA40
+chatOffsets := [0x8, 0x8C, 0x8, 0x90, 0x2DC, 0x0]
+
 Gui, 1:Default
+Gui, Add, Tab3,, General|Quests|Seasonals
 Gui, Font, s16, Segoe UI
 Gui, Add, Text,, What is this?
 Gui, Font, s12, Segoe UI
@@ -25,6 +59,25 @@ Gui, Add, Text,y+1, - Click 'Send to DQX'. The program will move your DQX chat c
 Gui, Add, Edit, r1 vTextToSend w500, %textToSend%
 Gui, Add, Button, gSend, Send to DQX
 Gui, Add, Button, gCloseApp x+295, Exit Program
+
+Gui, Tab, Quests
+Gui, Add, Text,, Press a button to enter what you need to say to continue the quest.
+For index, value in questDict
+  If (A_Index < 11)
+    Gui, Add, Button, gQuestSend, %index%
+  Else If (A_Index = 11)
+    Gui, Add, Button, gQuestSend x+10 y58, %index%
+  Else If (A_Index > 11 and A_Index < 21)
+    Gui, Add, Button, gQuestSend, %index%
+  Else If (A_Index = 21)
+    Gui, Add, Button, gQuestSend x+20 y58, %index%
+  Else If (A_Index > 21 and A_Index < 31)
+    Gui, Add, Button, gQuestSend, %index%
+
+Gui, Tab, Seasonals
+Gui, Add, Text,, Press a button to enter what you need to say to continue the quest.
+For index, value in seasonalDict
+  Gui, Add, Button, gSeasonalSend, %index%
 
 Gui, +alwaysontop
 Gui, Show, Autosize
@@ -51,11 +104,64 @@ Send:
 
     dqx := new _ClassMemory("ahk_exe DQXGame.exe", "", hProcessCopy)
     baseAddress := dqx.getProcessBaseAddress("ahk_exe DQXGame.exe")
-    chatAddress := 0x01EEAA40
-    chatOffsets := [0x8, 0x8C, 0x8, 0x90, 0x2DC, 0x0]
     dqx.writeBytes(baseAddress + chatAddress, convertStrToHex(textToSend), chatOffsets*)
   }
   else
   {
     msgBox "DQX window not found."
   }
+  Return
+
+QuestSend:
+  GuiControlGet, getQuestNumber,, % A_GuiControl
+  questText := questDict[getQuestNumber]
+  sanitizedBytes := StrReplace(convertStrToHex(questText), "`r`n", "")
+  numberToArrowOver := StrLen(sanitizedBytes) // 2
+
+  Process, Exist, DQXGame.exe
+  if ErrorLevel
+  {
+    WinActivate, ahk_exe DQXGame.exe
+    ;; Have to move the chat cursor to the position to where it should be for the text to send correctly
+    Loop {
+      Sleep 50
+      Send {Right}
+    }
+    Until A_Index = numberToArrowOver
+
+    dqx := new _ClassMemory("ahk_exe DQXGame.exe", "", hProcessCopy)
+    baseAddress := dqx.getProcessBaseAddress("ahk_exe DQXGame.exe")
+    dqx.writeBytes(baseAddress + chatAddress, convertStrToHex(questText), chatOffsets*)
+  }
+  else
+  {
+    msgBox "DQX window not found."
+  }
+  Return
+
+SeasonalSend:
+  GuiControlGet, getQuestNumber,, % A_GuiControl
+  questText := seasonalDict[getQuestNumber]
+  sanitizedBytes := StrReplace(convertStrToHex(questText), "`r`n", "")
+  numberToArrowOver := StrLen(sanitizedBytes) // 2
+
+  Process, Exist, DQXGame.exe
+  if ErrorLevel
+  {
+    WinActivate, ahk_exe DQXGame.exe
+    ;; Have to move the chat cursor to the position to where it should be for the text to send correctly
+    Loop {
+      Sleep 50
+      Send {Right}
+    }
+    Until A_Index = numberToArrowOver
+
+    dqx := new _ClassMemory("ahk_exe DQXGame.exe", "", hProcessCopy)
+    baseAddress := dqx.getProcessBaseAddress("ahk_exe DQXGame.exe")
+    dqx.writeBytes(baseAddress + chatAddress, convertStrToHex(questText), chatOffsets*)
+  }
+  else
+  {
+    msgBox "DQX window not found."
+  }
+  Return
