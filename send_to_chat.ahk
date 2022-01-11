@@ -38,12 +38,22 @@ questDict := { "Quest 001": "みーつけた！"
 seasonalDict := { "Halloween Quest": "トリックオアトリート"
                 , "Christmas Quest": "メリークリスマス" }
 
+commonPhrasesDict := { "Thank you!": "ありがとう！"
+                     , "Hello!": "こんにちは！"
+                     , "Good luck!": "がんばって！"
+                     , "Congrats!": "おめでとう！"
+                     , "No problem": "どういたしまして"
+                     , "Nice to meet you": "よろしくお願いします"
+                     , "Good job": "おつかれさまでした"
+                     , "Sorry": "ごめんなさい"
+                     , "Are you ready?": "準備OK?" }
+
 ; These will change on patches
 chatAddress := 0x01EEAA40
 chatOffsets := [0x8, 0x8C, 0x8, 0x90, 0x2DC, 0x0]
 
 Gui, 1:Default
-Gui, Add, Tab3,, General|Quests|Seasonals
+Gui, Add, Tab3,, General|Quests|Seasonals|Common Phrases
 Gui, Font, s16, Segoe UI
 Gui, Add, Text,, What is this?
 Gui, Font, s12, Segoe UI
@@ -78,6 +88,21 @@ Gui, Tab, Seasonals
 Gui, Add, Text,, Press a button to enter what you need to say to continue the quest.
 For index, value in seasonalDict
   Gui, Add, Button, gSeasonalSend, %index%
+
+Gui, Tab, Common Phrases
+Gui, Add, Text,, Press a button to enter a common phrase into the chat.
+For index, value in commonPhrasesDict
+  If (A_Index < 11)
+    Gui, Add, Button, gPhraseSend, %index%
+  Else If (A_Index = 11)
+    Gui, Add, Button, gPhraseSend x+10 y58, %index%
+  Else If (A_Index > 11 and A_Index < 21)
+    Gui, Add, Button, gPhraseSend, %index%
+  Else If (A_Index = 21)
+    Gui, Add, Button, gPhraseSend x+20 y58, %index%
+  Else If (A_Index > 21 and A_Index < 31)
+    Gui, Add, Button, gPhraseSend, %index%
+
 
 Gui, +alwaysontop
 Gui, Show, Autosize
@@ -159,6 +184,33 @@ SeasonalSend:
     dqx := new _ClassMemory("ahk_exe DQXGame.exe", "", hProcessCopy)
     baseAddress := dqx.getProcessBaseAddress("ahk_exe DQXGame.exe")
     dqx.writeBytes(baseAddress + chatAddress, convertStrToHex(questText), chatOffsets*)
+  }
+  else
+  {
+    msgBox "DQX window not found."
+  }
+  Return
+
+PhraseSend:
+  GuiControlGet, getPhrase,, % A_GuiControl
+  phraseText := commonPhrasesDict[getPhrase]
+  sanitizedBytes := StrReplace(convertStrToHex(phraseText), "`r`n", "")
+  numberToArrowOver := StrLen(sanitizedBytes) // 2
+
+  Process, Exist, DQXGame.exe
+  if ErrorLevel
+  {
+    WinActivate, ahk_exe DQXGame.exe
+    ;; Have to move the chat cursor to the position to where it should be for the text to send correctly
+    Loop {
+      Sleep 50
+      Send {Right}
+    }
+    Until A_Index = numberToArrowOver
+
+    dqx := new _ClassMemory("ahk_exe DQXGame.exe", "", hProcessCopy)
+    baseAddress := dqx.getProcessBaseAddress("ahk_exe DQXGame.exe")
+    dqx.writeBytes(baseAddress + chatAddress, convertStrToHex(phraseText), chatOffsets*)
   }
   else
   {
