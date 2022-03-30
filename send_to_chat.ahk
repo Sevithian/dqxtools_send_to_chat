@@ -49,8 +49,8 @@ commonPhrasesDict := { "Thank you!": "ありがとう！"
                      , "Are you ready?": "準備OK?" }
 
 ; These will change on patches
-chatAddress := 0x01F3DAD4
-chatOffsets := [0x8, 0x8C, 0x8, 0x90, 0x2DC, 0x0]
+chatAddress := 0x01F3CAD4
+chatOffsets := [0x8, 0x8C, 0x8, 0x90, 0x2D8, 0x0]
 
 Gui, 1:Default
 Gui, Add, Tab3,, General|Quests|Seasonals|Common Phrases
